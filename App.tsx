@@ -18,6 +18,7 @@ const App: React.FC = () => {
     const [roster, setRoster] = useState<Roster | null>(null);
     const [coverageIssues, setCoverageIssues] = useState<CoverageIssue[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [teamAShift, setTeamAShift] = useState<1 | 2>(1);
     
     const rosterTableRef = useRef<HTMLDivElement>(null);
 
@@ -33,7 +34,7 @@ const App: React.FC = () => {
         // Use a timeout to allow the loading spinner to render before the heavy computation starts
         setTimeout(() => {
             try {
-                const { schedule, issues } = generateRoster(employees, startDate, endDate);
+                const { schedule, issues } = generateRoster(employees, startDate, endDate, teamAShift);
                 setRoster(schedule);
                 setCoverageIssues(issues);
             } catch (error) {
@@ -43,7 +44,7 @@ const App: React.FC = () => {
                 setIsLoading(false);
             }
         }, 50);
-    }, [employees, startDate, endDate]);
+    }, [employees, startDate, endDate, teamAShift]);
 
     const handleExportImage = useCallback(() => {
         // The ref is on the scroll container. We need to capture its child, which has the full width.
@@ -86,6 +87,8 @@ const App: React.FC = () => {
                             onEmployeeUpdate={handleEmployeeUpdate}
                             onGenerate={handleGenerateClick}
                             isLoading={isLoading}
+                            teamAShift={teamAShift}
+                            onShiftChange={setTeamAShift}
                         />
                     </div>
 

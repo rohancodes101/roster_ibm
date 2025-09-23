@@ -1,4 +1,3 @@
-
 import { Employee, Roster, CoverageIssue, ScheduleType, AssetClass, Team, WeekOffPreference } from '../types';
 
 export const getDatesInRange = (startDate: Date, endDate: Date): Date[] => {
@@ -13,7 +12,7 @@ export const getDatesInRange = (startDate: Date, endDate: Date): Date[] => {
     return dates;
 };
 
-export const generateRoster = (employees: Employee[], startDateStr: string, endDateStr: string): { schedule: Roster, issues: CoverageIssue[] } => {
+export const generateRoster = (employees: Employee[], startDateStr: string, endDateStr: string, teamAShift: 1 | 2): { schedule: Roster, issues: CoverageIssue[] } => {
     const startDate = new Date(startDateStr);
     const endDate = new Date(endDateStr);
     const dates = getDatesInRange(startDate, endDate);
@@ -34,12 +33,14 @@ export const generateRoster = (employees: Employee[], startDateStr: string, endD
                 schedule[emp.id][dateString] = { type: ScheduleType.COMP_OFF, isGap: false };
             } else {
                 let shiftType = ScheduleType.OFF;
+                const teamBShift = teamAShift === 1 ? 2 : 1;
+                
                 if (emp.fixedShift) {
                     shiftType = emp.fixedShift === 1 ? ScheduleType.SHIFT1 : ScheduleType.SHIFT2;
                 } else if (emp.team === Team.A) {
-                    shiftType = ScheduleType.SHIFT1;
+                    shiftType = teamAShift === 1 ? ScheduleType.SHIFT1 : ScheduleType.SHIFT2;
                 } else if (emp.team === Team.B) {
-                    shiftType = ScheduleType.SHIFT2;
+                    shiftType = teamBShift === 1 ? ScheduleType.SHIFT1 : ScheduleType.SHIFT2;
                 }
                 schedule[emp.id][dateString] = { type: shiftType, isGap: false };
             }
@@ -137,7 +138,15 @@ export const generateRoster = (employees: Employee[], startDateStr: string, endD
         // Find a placeholder employee cell to mark the gap
         const empToMark = employees.find(e => {
             const coversAsset = e.assetClass === issue.assetClass || e.assetClass === AssetClass.ALL;
-            const correctShiftTeam = (issue.shift === 1 && e.team === Team.A) || (issue.shift === 2 && e.team === Team.B) || e.assetClass === AssetClass.ALL;
+            
+            const teamAShiftType = teamAShift === 1 ? ScheduleType.SHIFT1 : ScheduleType.SHIFT2;
+            const teamBShiftType = teamAShift === 1 ? ScheduleType.SHIFT2 : ScheduleType.SHIFT1;
+            const issueShiftType = issue.shift === 1 ? ScheduleType.SHIFT1 : ScheduleType.SHIFT2;
+            
+            const correctShiftTeam = (issueShiftType === teamAShiftType && e.team === Team.A) || 
+                                     (issueShiftType === teamBShiftType && e.team === Team.B) || 
+                                     e.assetClass === AssetClass.ALL; // Keep ALL as a catch-all
+
             return coversAsset && correctShiftTeam;
         });
 

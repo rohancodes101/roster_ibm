@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Employee, WeekOffPreference } from '../types';
-import { CalendarIcon, UserGroupIcon, GenerateIcon, LoadingIcon, ChevronDownIcon, AddIcon, RemoveIcon } from './Icons';
+import { CalendarIcon, UserGroupIcon, GenerateIcon, LoadingIcon, ChevronDownIcon, AddIcon, RemoveIcon, SwapIcon } from './Icons';
 
 interface RosterControlsProps {
     startDate: string;
@@ -11,6 +11,8 @@ interface RosterControlsProps {
     onEmployeeUpdate: (employees: Employee[]) => void;
     onGenerate: () => void;
     isLoading: boolean;
+    teamAShift: 1 | 2;
+    onShiftChange: (shift: 1 | 2) => void;
 }
 
 interface DateListInputProps {
@@ -159,7 +161,7 @@ const EmployeeControl: React.FC<{ employee: Employee; allEmployees: Employee[]; 
 };
 
 
-export const RosterControls: React.FC<RosterControlsProps> = ({ startDate, setStartDate, endDate, setEndDate, employees, onEmployeeUpdate, onGenerate, isLoading }) => {
+export const RosterControls: React.FC<RosterControlsProps> = ({ startDate, setStartDate, endDate, setEndDate, employees, onEmployeeUpdate, onGenerate, isLoading, teamAShift, onShiftChange }) => {
     const [expandedId, setExpandedId] = useState<number | null>(employees[0]?.id || null);
 
     const handleToggle = (id: number) => {
@@ -194,6 +196,28 @@ export const RosterControls: React.FC<RosterControlsProps> = ({ startDate, setSt
                     </div>
                 </div>
             </div>
+
+            <div>
+                <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2"><SwapIcon /> Shift Assignment</h2>
+                <div className="flex items-center justify-around p-3 bg-gray-700/50 rounded-lg">
+                    <div className="text-center">
+                        <p className="text-sm font-medium text-gray-400">Team A</p>
+                        <p className="font-bold text-lg text-white">{teamAShift === 1 ? 'Shift 1' : 'Shift 2'}</p>
+                    </div>
+                    <button
+                        onClick={() => onShiftChange(teamAShift === 1 ? 2 : 1)}
+                        aria-label="Swap shifts between Team A and Team B"
+                        className="p-3 rounded-full bg-indigo-600 hover:bg-indigo-700 transition-transform duration-300 transform hover:rotate-180 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75"
+                    >
+                        <SwapIcon className="h-5 w-5 text-white" />
+                    </button>
+                    <div className="text-center">
+                        <p className="text-sm font-medium text-gray-400">Team B</p>
+                        <p className="font-bold text-lg text-white">{teamAShift === 1 ? 'Shift 2' : 'Shift 1'}</p>
+                    </div>
+                </div>
+            </div>
+
              <div>
                 <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2"><UserGroupIcon /> Employee Settings</h2>
                 <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-2">
@@ -210,6 +234,7 @@ export const RosterControls: React.FC<RosterControlsProps> = ({ startDate, setSt
                     ))}
                 </div>
             </div>
+
              <button
                 onClick={onGenerate}
                 disabled={isLoading}
