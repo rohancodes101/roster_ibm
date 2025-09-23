@@ -1,0 +1,5 @@
+{
+  "name": "Intelligent Roster Generator",
+  "description": "An advanced web application for managers to automatically generate, visualize, and export employee shift rosters based on complex constraints like asset class coverage, alternating shifts, and individual leave requests.",
+  "requestFramePermissions": []
+}
